@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gym Membership Manager BD</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="wrap topbar-in">
+    <div>
+      <h1 id="appTitle" data-i18n="appTitle">Gym Membership Manager</h1>
+      <p class="sub" id="appSub" data-i18n="appSub">Members, plans, fees &amp; attendance &#8212; fully offline</p>
+    </div>
+    <button id="langToggle" class="btn btn-ghost" type="button">&#2476;&#2494;&#2434;&#2482;&#2494;</button>
+  </div>
+</header>
+
+<nav class="tabs wrap" aria-label="Sections">
+  <button class="tab active" data-tab="dashboard" type="button" data-i18n="tabDashboard">Dashboard</button>
+  <button class="tab" data-tab="members" type="button" data-i18n="tabMembers">Members</button>
+  <button class="tab" data-tab="plans" type="button" data-i18n="tabPlans">Plans</button>
+  <button class="tab" data-tab="attendance" type="button" data-i18n="tabAttendance">Attendance</button>
+  <button class="tab" data-tab="data" type="button" data-i18n="tabData">Data</button>
+</nav>
+
+<main class="wrap">
+  <!-- DASHBOARD -->
+  <section id="view-dashboard" class="view">
+    <div class="stats">
+      <div class="stat"><span class="stat-num" id="stat-active">0</span><span class="stat-label" data-i18n="statActive">Active members</span></div>
+      <div class="stat warn"><span class="stat-num" id="stat-expiring">0</span><span class="stat-label" data-i18n="statExpiring">Expiring in 7 days</span></div>
+      <div class="stat bad"><span class="stat-num" id="stat-expired">0</span><span class="stat-label" data-i18n="statExpired">Expired</span></div>
+      <div class="stat"><span class="stat-num" id="stat-collected">&#2547;0.00</span><span class="stat-label" data-i18n="statCollected">Collected this month</span></div>
+      <div class="stat bad"><span class="stat-num" id="stat-due">&#2547;0.00</span><span class="stat-label" data-i18n="statDue">Total due</span></div>
+      <div class="stat"><span class="stat-num" id="stat-today">0</span><span class="stat-label" data-i18n="statToday">Checked in today</span></div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h2 data-i18n="expiringTitle">Expiring soon</h2>
+        <div id="expiring-list"></div>
+      </div>
+      <div class="card">
+        <h2 data-i18n="recentPayments">Recent payments</h2>
+        <div id="recent-payments"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MEMBERS -->
+  <section id="view-members" class="view hidden">
+    <div class="card">
+      <h2 id="m-form-title" data-i18n="addMember">Add member</h2>
+      <form id="member-form" novalidate>
+        <div class="form-grid">
+          <label><span data-i18n="name">Name</span>
+            <input id="m-name" type="text" maxlength="60" autocomplete="off">
+            <small class="err" id="e-m-name"></small></label>
+          <label><span data-i18n="phone">Mobile</span>
+            <input id="m-phone" type="tel" inputmode="numeric" placeholder="01XXXXXXXXX" autocomplete="off">
+            <small class="err" id="e-m-phone"></small></label>
+          <label><span data-i18n="gender">Gender</span>
+            <select id="m-gender">
+              <option value="" data-i18n="genderAny">Prefer not to say</option>
+              <option value="male" data-i18n="male">Male</option>
+              <option value="female" data-i18n="female">Female</option>
+            </select></label>
+          <label><span data-i18n="plan">Plan</span>
+            <select id="m-plan"></select>
+            <small class="err" id="e-m-plan"></small></label>
+          <label><span data-i18n="startDate">Start date</span>
+            <input id="m-start" type="date">
+            <small class="err" id="e-m-start"></small></label>
+          <label><span data-i18n="trainer">Trainer (optional)</span>
+            <input id="m-trainer" type="text" maxlength="60" autocomplete="off"></label>
+          <label class="span2"><span data-i18n="notes">Notes (optional)</span>
+            <input id="m-notes" type="text" maxlength="120" autocomplete="off"></label>
+        </div>
+        <div class="row">
+          <button class="btn btn-primary" type="submit" id="m-save" data-i18n="save">Save</button>
+          <button class="btn hidden" type="button" id="m-cancel" data-i18n="cancel">Cancel</button>
+        </div>
+      </form>
+    </div>
+    <div class="toolbar">
+      <input id="member-search" type="search" data-i18n-ph="searchPh" placeholder="Search name or mobile&#8230;" aria-label="Search members">
+      <div class="chips" id="member-filters">
+        <button class="chip active" data-filter="all" type="button" data-i18n="filterAll">All</button>
+        <button class="chip" data-filter="active" type="button" data-i18n="filterActive">Active</button>
+        <button class="chip" data-filter="expiring" type="button" data-i18n="filterExpiring">Expiring soon</button>
+        <button class="chip" data-filter="expired" type="button" data-i18n="filterExpired">Expired</button>
+      </div>
+    </div>
+    <div id="member-list"></div>
+  </section>
+
+  <!-- PLANS -->
+  <section id="view-plans" class="view hidden">
+    <div class="card">
+      <h2 data-i18n="addPlan">Add plan</h2>
+      <form id="plan-form" novalidate>
+        <div class="form-grid">
+          <label><span data-i18n="planName">Plan name</span>
+            <input id="p-name" type="text" maxlength="60" data-i18n-ph="planNamePh" placeholder="e.g. Monthly" autocomplete="off">
+            <small class="err" id="e-p-name"></small></label>
+          <label><span data-i18n="duration">Duration (months)</span>
+            <input id="p-months" type="number" min="1" max="24" step="1" value="1" inputmode="numeric">
+            <small class="err" id="e-p-months"></small></label>
+          <label><span data-i18n="fee">Fee (&#2547;)</span>
+            <input id="p-fee" type="number" min="0" max="10000000" step="0.01" placeholder="1500" inputmode="decimal">
+            <small class="err" id="e-p-fee"></small></label>
+        </div>
+        <div class="row">
+          <button class="btn btn-primary" type="submit" data-i18n="save">Save</button>
+        </div>
+      </form>
+    </div>
+    <div id="plan-list"></div>
+  </section>
+
+  <!-- ATTENDANCE -->
+  <section id="view-attendance" class="view hidden">
+    <div class="card">
+      <h2 data-i18n="attendanceTitle">Attendance</h2>
+      <div class="row">
+        <label class="inline"><span data-i18n="attDate">Date</span>
+          <input id="att-date" type="date"></label>
+        <span id="att-summary" class="muted"></span>
+      </div>
+      <div id="att-list"></div>
+    </div>
+  </section>
+
+  <!-- DATA -->
+  <section id="view-data" class="view hidden">
+    <div class="card">
+      <h2 data-i18n="dataTitle">Your data</h2>
+      <p class="muted" id="data-count"></p>
+      <div class="row wrap-row">
+        <button class="btn" type="button" id="export-btn" data-i18n="exportBtn">Export JSON</button>
+        <label class="btn" for="import-file" data-i18n="importBtn">Import JSON</label>
+        <input id="import-file" type="file" accept="application/json,.json" class="visually-hidden">
+      </div>
+      <hr>
+      <div class="row wrap-row">
+        <input id="erase-input" type="text" data-i18n-ph="eraseConfirm" placeholder="Type DELETE to erase everything" autocomplete="off">
+        <button class="btn btn-danger" type="button" id="erase-btn" data-i18n="eraseBtn">Erase all data</button>
+      </div>
+      <p id="data-msg" class="msg" role="status"></p>
+    </div>
+  </section>
+</main>
+
+<!-- PAYMENT MODAL -->
+<div id="pay-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="pay-title">
+  <div class="modal-box card">
+    <h2 id="pay-title" data-i18n="paymentTitle">Record payment</h2>
+    <p class="muted" id="pay-member-name"></p>
+    <form id="pay-form" novalidate>
+      <div class="form-grid">
+        <label><span data-i18n="amount">Amount (&#2547;)</span>
+          <input id="pay-amount" type="number" min="0.01" max="10000000" step="0.01" inputmode="decimal">
+          <small class="err" id="e-pay-amount"></small></label>
+        <label><span data-i18n="payDate">Date</span>
+          <input id="pay-date" type="date">
+          <small class="err" id="e-pay-date"></small></label>
+        <label><span data-i18n="method">Method</span>
+          <select id="pay-method">
+            <option value="cash" data-i18n="cash">Cash</option>
+            <option value="bkash" data-i18n="bkash">bKash</option>
+            <option value="nagad" data-i18n="nagad">Nagad</option>
+            <option value="bank" data-i18n="bank">Bank transfer</option>
+          </select></label>
+        <label><span data-i18n="payNote">Note (optional)</span>
+          <input id="pay-note" type="text" maxlength="120" autocomplete="off"></label>
+      </div>
+      <div class="row">
+        <button class="btn btn-primary" type="submit" data-i18n="record">Record</button>
+        <button class="btn" type="button" id="pay-cancel" data-i18n="cancel">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<footer class="wrap">
+  <p class="muted" id="footer-text" data-i18n="footer">Offline personal tool. Fees and plans are whatever you enter &#8212; no prices are built in. Always confirm money against your own records.</p>
+</footer>
+
+<script src="js/i18n.js"></script>
+<script src="js/logic.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
